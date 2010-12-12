@@ -39,12 +39,20 @@ void incrementString(string &, int);
  * 
  */
 int main(int argc, char** argv) {
+    bool verbose = false;
+    for(int i = 0; i < argc; i++) {
+        if((strcmp(argv[i],"-v") == 0) || (strcmp(argv[i],"-V") == 0)) {
+            verbose = true;
+        }
+    }
+
     string value = " ";
     string hashValue = "";
     string originalHash = "";
     int stringPosition = 0;
     SHA1 hash;
     SecByteBlock sbbDigest(SHA1::DIGESTSIZE);
+    unsigned long int count = 1;
 
     cout << "Please input a SHA1 hash you would like to search for: " << endl;
     cin >> originalHash;
@@ -59,15 +67,22 @@ int main(int argc, char** argv) {
         originalHash[i] = toupper(originalHash[i]);
     }
     cout << "Converted Hash: " << originalHash << endl;
-    time_t t = time(NULL);
-    cout << "Time started: " << ctime(&t) << endl;
+    time_t start_t = time(NULL);
+
+    cout << "Beginning search..." << endl;
 
     while(true) {
         hash.CalculateDigest(sbbDigest.begin(), (byte const *)value.c_str(), value.size());
         HexEncoder(new StringSink(hashValue)).Put(sbbDigest.begin(), sbbDigest.size());
+        
+        if(verbose) {
+            cout << "Iteration: " << count << " Value: " << value << " Hash: " <<  hashValue << endl;
+        }
+
         if(hashValue == originalHash) {
-            time_t t = time(NULL);
-            cout << "Ending time: " << ctime(&t) << endl;
+            time_t end_t = time(NULL);
+            cout << "Start time: " << ctime(&start_t) << endl;
+            cout << "Ending time: " << ctime(&end_t) << endl;
             cout << "We have located a value for orignal hash: " << originalHash << endl;
             cout << "The value is: " << value << endl;
             return 0;
@@ -75,6 +90,7 @@ int main(int argc, char** argv) {
             hashValue = "";
             incrementString(value, stringPosition);
         }
+        count++;
     }
 
     return 0;
